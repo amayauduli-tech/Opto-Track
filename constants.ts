@@ -16,7 +16,7 @@ export const INITIAL_SUBJECTS = [
 
 export const ACHIEVEMENT_TEMPLATES = [
   { id: 'first_step', title: 'First Step', description: 'Complete your first study session', icon: '🎯' },
-  { id: 'repetition_king', title: 'Repetition King', description: 'Complete 10 repetitions of any chapter', icon: '👑' },
+  { id: 'repetition_king', title: 'Repetition King', description: 'Reach the maximum of 7 repetitions for any chapter', icon: '👑' },
   { id: 'subject_master', title: 'Subject Master', description: 'Complete all chapters in one subject', icon: '📚' },
   { id: 'overachiever', title: 'Overachiever', description: 'Exceed a target repetition goal', icon: '🚀' },
   { id: 'consistent_learner', title: 'Steady Scholar', description: 'Study 5 days in a row', icon: '🔥' },

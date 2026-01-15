@@ -24,7 +24,8 @@ const App: React.FC = () => {
       const totalReps = state.subjects.reduce((sum, s) => sum + s.chapters.reduce((cSum, c) => cSum + c.currentReps, 0), 0);
       
       if (ach.id === 'first_step' && totalReps >= 1) conditionMet = true;
-      if (ach.id === 'repetition_king' && state.subjects.some(s => s.chapters.some(c => c.currentReps >= 10))) conditionMet = true;
+      // Adjusted from 10 to 7 as per the new maximum limit
+      if (ach.id === 'repetition_king' && state.subjects.some(s => s.chapters.some(c => c.currentReps >= 7))) conditionMet = true;
       if (ach.id === 'subject_master' && state.subjects.some(s => s.chapters.length > 0 && s.chapters.every(c => c.currentReps >= c.targetReps))) conditionMet = true;
       if (ach.id === 'overachiever' && state.subjects.some(s => s.chapters.some(c => c.currentReps > c.targetReps))) conditionMet = true;
 

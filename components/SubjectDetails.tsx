@@ -21,7 +21,7 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
       id: Date.now().toString(),
       name: newName,
       currentReps: 0,
-      targetReps: newTarget,
+      targetReps: Math.min(7, newTarget), // Cap target at 7
     };
     onUpdateSubject({
       ...subject,
@@ -35,7 +35,12 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
     onUpdateSubject({
       ...subject,
       chapters: subject.chapters.map(c => 
-        c.id === chapterId ? { ...c, currentReps: Math.max(0, c.currentReps + delta), lastStudied: new Date().toISOString() } : c
+        c.id === chapterId ? { 
+          ...c, 
+          // Enforce 0-7 repetition range
+          currentReps: Math.min(7, Math.max(0, c.currentReps + delta)), 
+          lastStudied: new Date().toISOString() 
+        } : c
       )
     });
   };
@@ -123,7 +128,10 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
 
             {isAdding && (
               <div className="mb-8 p-6 bg-indigo-50 rounded-2xl border border-indigo-100 animate-in slide-in-from-top duration-300">
-                <h4 className="font-bold mb-4">New Chapter Details</h4>
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="font-bold">New Chapter Details</h4>
+                  <span className="text-[10px] font-black bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full uppercase tracking-tighter">Max 7 Reps Enforced</span>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="text"
@@ -133,13 +141,14 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
                     onChange={(e) => setNewName(e.target.value)}
                   />
                   <div className="flex items-center space-x-3">
-                    <label className="text-sm font-medium text-gray-600">Target Reps:</label>
+                    <label className="text-sm font-medium text-gray-600">Target Reps (Max 7):</label>
                     <input
                       type="number"
                       min="1"
+                      max="7"
                       className="w-20 p-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none"
                       value={newTarget}
-                      onChange={(e) => setNewTarget(parseInt(e.target.value) || 5)}
+                      onChange={(e) => setNewTarget(Math.min(7, parseInt(e.target.value) || 1))}
                     />
                   </div>
                 </div>
@@ -159,6 +168,7 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
               ) : (
                 subject.chapters.map(chapter => {
                   const isDone = chapter.currentReps >= chapter.targetReps;
+                  const atLimit = chapter.currentReps >= 7;
                   return (
                     <div key={chapter.id} className={`p-5 rounded-2xl border transition-all ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-gray-100'}`}>
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -166,6 +176,7 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
                           <div className="flex items-center space-x-2">
                             <h4 className={`font-bold text-lg ${isDone ? 'text-emerald-800 line-through' : 'text-gray-800'}`}>{chapter.name}</h4>
                             {isDone && <span className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Mastered</span>}
+                            {atLimit && <span className="bg-amber-100 text-amber-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Full Reps</span>}
                           </div>
                           <p className="text-xs text-gray-500 mt-1">
                             Current: <span className="font-bold text-gray-700">{chapter.currentReps}</span> / Target: <span className="font-bold text-gray-700">{chapter.targetReps}</span>
@@ -176,9 +187,25 @@ export const SubjectDetails: React.FC<SubjectDetailsProps> = ({ subject, onUpdat
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <button onClick={() => updateRep(chapter.id, -1)} className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold">-</button>
-                          <button onClick={() => updateRep(chapter.id, 1)} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center font-bold">+</button>
-                          <button onClick={() => deleteChapter(chapter.id)} className="w-10 h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center text-sm">🗑️</button>
+                          <button 
+                            onClick={() => updateRep(chapter.id, -1)} 
+                            className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold"
+                          >
+                            -
+                          </button>
+                          <button 
+                            onClick={() => updateRep(chapter.id, 1)} 
+                            disabled={atLimit}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all ${atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
+                          >
+                            +
+                          </button>
+                          <button 
+                            onClick={() => deleteChapter(chapter.id)} 
+                            className="w-10 h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center text-sm"
+                          >
+                            🗑️
+                          </button>
                         </div>
                       </div>
                     </div>
