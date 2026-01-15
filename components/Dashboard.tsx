@@ -10,6 +10,8 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) => {
+  const isDark = state.theme === 'dark';
+
   const stats = useMemo(() => {
     let totalChapters = 0;
     let completedChapters = 0;
@@ -27,7 +29,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
     return { totalChapters, completedChapters, completionRate, totalReps };
   }, [state.subjects]);
 
-  // Priority Chapters (Focus Required)
   const focusRequired = useMemo(() => {
     const list: { chapterName: string; subject: Subject; progress: number }[] = [];
     state.subjects.forEach(s => {
@@ -44,7 +45,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
     return list.sort((a, b) => a.progress - b.progress).slice(0, 4);
   }, [state.subjects]);
 
-  // Upcoming Exams
   const upcomingExams = useMemo(() => {
     return state.subjects
       .flatMap(s => s.exams.map(e => ({ ...e, subjectColor: s.color, subjectName: s.name })))
@@ -53,7 +53,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
       .slice(0, 3);
   }, [state.subjects]);
 
-  // Weekly Study Activity Data
   const weeklyActivityData = useMemo(() => {
     const now = new Date();
     const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -81,46 +80,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
     <div className="space-y-8 pb-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight">Personal Dashboard</h1>
+          <h1 className={`text-4xl font-black tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>Personal Dashboard</h1>
           <p className="text-gray-500 font-medium">Your optometry journey at a glance.</p>
         </div>
-        <div className="flex items-center space-x-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div className={`flex items-center space-x-4 p-4 rounded-2xl border transition-colors ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
           <div className="text-right">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Level {Math.floor(state.experience / 1000) + 1}</p>
-            <p className="text-2xl font-black text-indigo-600">{state.experience} <span className="text-xs text-gray-400">XP</span></p>
+            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{state.experience} <span className="text-xs text-gray-400">XP</span></p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-2xl text-white shadow-lg shadow-indigo-100">
+          <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-2xl text-white shadow-lg dark:shadow-none">
             🔭
           </div>
         </div>
       </header>
 
-      {/* Hero Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Weekly Activity Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+        <div className={`lg:col-span-2 p-6 rounded-3xl border transition-colors ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-gray-800">Study Intensity (Last 7 Days)</h3>
-            <span className="text-xs font-bold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full">Weekly Repetitions</span>
+            <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Study Intensity (Last 7 Days)</h3>
+            <span className={`text-xs font-bold px-3 py-1 rounded-full ${isDark ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-500'}`}>Weekly Repetitions</span>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#94a3b8' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#94a3b8' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#1e293b' : '#f1f5f9'} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#64748b' : '#94a3b8' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#64748b' : '#94a3b8' }} />
                 <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                  cursor={{ fill: isDark ? '#0f172a' : '#f8fafc' }}
+                  contentStyle={{ 
+                    backgroundColor: isDark ? '#1e293b' : '#ffffff', 
+                    borderRadius: '12px', 
+                    border: 'none', 
+                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                    color: isDark ? '#ffffff' : '#000000'
+                  }}
                 />
-                <Bar dataKey="reps" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="reps" fill={isDark ? '#818cf8' : '#6366f1'} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Global Progress Circle Placeholder */}
-        <div className="bg-indigo-600 p-8 rounded-3xl text-white flex flex-col justify-between shadow-xl shadow-indigo-100 relative overflow-hidden">
+        <div className="bg-indigo-600 p-8 rounded-3xl text-white flex flex-col justify-between shadow-xl shadow-indigo-100 dark:shadow-none relative overflow-hidden">
           <div className="relative z-10">
             <h3 className="text-xl font-bold mb-1">Course Mastery</h3>
             <p className="text-indigo-100 text-sm">Overall syllabus progress</p>
@@ -137,62 +140,62 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Focus Required */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+        <div className={`p-6 rounded-3xl border transition-colors ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
+          <h3 className={`text-lg font-bold mb-4 flex items-center ${isDark ? 'text-white' : 'text-gray-800'}`}>
             <span className="mr-2">🔥</span> Focus Required
           </h3>
           <div className="space-y-4">
             {focusRequired.length > 0 ? focusRequired.map((item, idx) => (
-              <div key={idx} className="group p-3 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+              <div key={idx} className={`group p-3 rounded-2xl transition-colors border border-transparent ${isDark ? 'hover:bg-slate-800 hover:border-slate-700' : 'hover:bg-slate-50 hover:border-slate-100'}`}>
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h5 className="text-sm font-bold text-gray-800 truncate">{item.chapterName}</h5>
+                    <h5 className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>{item.chapterName}</h5>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">{item.subject.name}</p>
                   </div>
-                  <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">Lags Target</span>
+                  <span className="text-[10px] font-black text-rose-500 bg-rose-50 dark:bg-rose-900/20 px-2 py-0.5 rounded-full">Lags Target</span>
                 </div>
-                <ProgressBar progress={item.progress} colorClass={item.subject.color} size="sm" />
+                <ProgressBar progress={item.progress} colorClass={item.subject.color} size="sm" theme={state.theme} />
               </div>
             )) : (
-              <p className="text-sm text-gray-400 text-center py-10">No chapters require urgent attention. Keep it up!</p>
+              <p className="text-sm text-gray-400 text-center py-10">Excellent work! No focus required.</p>
             )}
           </div>
         </div>
 
         {/* Upcoming Exams */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+        <div className={`p-6 rounded-3xl border transition-colors ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
+          <h3 className={`text-lg font-bold mb-4 flex items-center ${isDark ? 'text-white' : 'text-gray-800'}`}>
             <span className="mr-2">📅</span> Next Exams
           </h3>
           <div className="space-y-4">
             {upcomingExams.length > 0 ? upcomingExams.map((exam, idx) => {
               const daysLeft = Math.ceil((new Date(exam.date).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
               return (
-                <div key={idx} className="flex items-center space-x-4 p-3 rounded-2xl border border-slate-50">
+                <div key={idx} className={`flex items-center space-x-4 p-3 rounded-2xl border ${isDark ? 'border-slate-800 bg-slate-800/50' : 'border-slate-50'}`}>
                   <div className={`w-12 h-12 rounded-xl ${exam.subjectColor} flex flex-col items-center justify-center text-white shrink-0`}>
                     <span className="text-[9px] font-bold uppercase">{new Date(exam.date).toLocaleString('default', { month: 'short' })}</span>
                     <span className="text-lg font-black leading-none">{new Date(exam.date).getDate()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h5 className="text-sm font-bold text-gray-800 truncate">{exam.name}</h5>
+                    <h5 className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>{exam.name}</h5>
                     <p className="text-xs text-gray-500">{exam.subjectName}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">
+                    <p className={`text-[10px] font-black px-2 py-1 rounded-lg ${isDark ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}>
                       {daysLeft === 0 ? 'Today' : `${daysLeft}d left`}
                     </p>
                   </div>
                 </div>
               );
             }) : (
-              <p className="text-sm text-gray-400 text-center py-10">No upcoming exams scheduled.</p>
+              <p className="text-sm text-gray-400 text-center py-10">No upcoming exams.</p>
             )}
           </div>
         </div>
 
-        {/* Subject Progress Summary List */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Subject Mastery</h3>
+        {/* Subject Mastery List */}
+        <div className={`p-6 rounded-3xl border transition-colors flex flex-col ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
+          <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>Subject Mastery</h3>
           <div className="flex-1 space-y-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
             {state.subjects.map(s => {
               const completed = s.chapters.filter(c => c.currentReps >= c.targetReps).length;
@@ -205,10 +208,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
                   className="w-full text-left group"
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">{s.name}</span>
+                    <span className={`text-xs font-bold transition-colors ${isDark ? 'text-slate-300 group-hover:text-indigo-400' : 'text-gray-700 group-hover:text-indigo-600'}`}>{s.name}</span>
                     <span className="text-[10px] font-bold text-gray-400">{perc.toFixed(0)}%</span>
                   </div>
-                  <ProgressBar progress={perc} colorClass={s.color} size="sm" />
+                  <ProgressBar progress={perc} colorClass={s.color} size="sm" theme={state.theme} />
                 </button>
               );
             })}
@@ -216,23 +219,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
         </div>
       </div>
 
-      {/* Main Subjects Grid */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-black text-gray-900">Course Library</h3>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-sm font-bold text-indigo-600 hover:text-indigo-700">View All Details</button>
+          <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Course Library</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {state.subjects.map(subject => (
             <button
               key={subject.id}
               onClick={() => onSelectSubject(subject)}
-              className="group text-left p-5 bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl hover:scale-[1.02] hover:border-indigo-100 transition-all duration-300"
+              className={`group text-left p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-slate-900 border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800' : 'bg-white border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100'}`}
             >
-              <div className={`w-12 h-12 rounded-2xl ${subject.color} flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-${subject.color.split('-')[1]}-100`}>
+              <div className={`w-12 h-12 rounded-2xl ${subject.color} flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg ${isDark ? 'shadow-none' : ''}`}>
                 {subject.name.charAt(0)}
               </div>
-              <h4 className="font-bold text-gray-900 mb-1 truncate">{subject.name}</h4>
+              <h4 className={`font-bold mb-1 truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{subject.name}</h4>
               <p className="text-xs font-medium text-gray-400 mb-4">{subject.chapters.length} Chapters</p>
               <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
                 <span>Mastery</span>
@@ -249,6 +250,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
                 } 
                 colorClass={subject.color} 
                 size="sm"
+                theme={state.theme}
               />
             </button>
           ))}
@@ -257,13 +259,3 @@ export const Dashboard: React.FC<DashboardProps> = ({ state, onSelectSubject }) 
     </div>
   );
 };
-
-const StatCard = ({ title, value, icon, color, textColor }: { title: string, value: string, icon: string, color: string, textColor: string }) => (
-  <div className={`${color} p-5 rounded-2xl border border-white/50 shadow-sm`}>
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-xl">{icon}</span>
-    </div>
-    <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</h5>
-    <p className={`text-2xl font-black ${textColor}`}>{value}</p>
-  </div>
-);

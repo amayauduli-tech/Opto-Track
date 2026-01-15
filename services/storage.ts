@@ -15,7 +15,8 @@ export const loadState = (): AppState => {
       const parsed = JSON.parse(stored);
       return {
         ...parsed,
-        studyLog: parsed.studyLog || []
+        studyLog: parsed.studyLog || [],
+        theme: parsed.theme || 'light'
       };
     } catch (e) {
       console.error('Failed to parse storage', e);
@@ -31,7 +32,8 @@ export const loadState = (): AppState => {
     })),
     achievements: ACHIEVEMENT_TEMPLATES,
     experience: 0,
-    studyLog: []
+    studyLog: [],
+    theme: 'light'
   };
 };
 

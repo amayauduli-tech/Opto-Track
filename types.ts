@@ -45,10 +45,12 @@ export interface StudySession {
 }
 
 export type ViewState = 'dashboard' | 'subject' | 'exams' | 'achievements';
+export type ThemeMode = 'light' | 'dark';
 
 export interface AppState {
   subjects: Subject[];
   achievements: Achievement[];
   experience: number;
   studyLog: StudySession[];
+  theme: ThemeMode;
 }
